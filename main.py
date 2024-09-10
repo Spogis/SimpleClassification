@@ -187,3 +187,4 @@ for passenger_id, name, true_value, prediction in zip(passenger_ids, names, true
     print(f"Predição: {'Sobreviveu' if prediction == 1 else 'Não sobreviveu'}")
     print()
 
+
