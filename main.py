@@ -18,7 +18,6 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.metrics import f1_score, precision_recall_curve
 
-
 # Carregando os dados
 train_data_url = 'https://raw.githubusercontent.com/Spogis/SimpleClassification/master/Datasets/train_data.csv'
 validation_data_url = 'https://raw.githubusercontent.com/Spogis/SimpleClassification/master/Datasets/test_data.csv'
@@ -73,7 +72,6 @@ xgb = XGBClassifier(
 # Treinando o modelo
 xgb.fit(X_train, y_train)
 
-
 ########################################################################################################################
 # A partir daqui fazemos o pós processamento das análises
 ########################################################################################################################
@@ -94,7 +92,6 @@ conf_matrix = confusion_matrix(y, predictions)
 conf_matrix_percentage_per_class = conf_matrix / np.sum(conf_matrix, axis=1, keepdims=True) * 100
 annot = np.array([["{:.1f}%".format(val) for val in row] for row in conf_matrix_percentage_per_class])
 
-plt.figure(1)
 plt.figure(figsize=(10, 8))
 sns.heatmap(conf_matrix_percentage_per_class, annot=annot, fmt="", cmap="Blues",
             xticklabels=['Not Survived', 'Survived'],
@@ -108,14 +105,13 @@ plt.title('Confusion Matrix')
 plt.tight_layout()
 # Salvar a figura da matriz de confusão
 plt.savefig('confusion_matrix.png', dpi=600)
-#plt.show()
+plt.close()
 
 # Importância das características
 feature_importances = xgb.feature_importances_
 features = categorical_features + numerical_features
 importances_df = pd.DataFrame({'Features': features, 'Importance': feature_importances}).sort_values(by='Importance', ascending=False)
 
-plt.figure(2)
 plt.figure(figsize=(10, 6))
 sns.barplot(x='Importance', y='Features', data=importances_df)
 plt.title('Feature Importance')
@@ -123,7 +119,7 @@ plt.xlabel('Importance')
 plt.ylabel('Features')
 # Salvar a figura da importância das características
 plt.savefig('feature_importance.png', dpi=600)
-#plt.show()
+plt.close()
 
 # Calculando as probabilidades para a classe positiva
 y_prob = xgb.predict_proba(X_test)[:, 1]
@@ -132,7 +128,7 @@ y_prob = xgb.predict_proba(X_test)[:, 1]
 auc_score = roc_auc_score(y_test, y_prob)
 print(f"AUC: {auc_score:.2f}")
 
-plt.figure(3)
+plt.figure(figsize=(10, 6))
 # Plotando a curva ROC
 fpr, tpr, _ = roc_curve(y_test, y_prob)
 plt.plot(fpr, tpr, label=f'AUC = {auc_score:.2f}')
@@ -142,16 +138,16 @@ plt.ylabel('True Positive Rate')
 plt.title('ROC Curve')
 plt.legend(loc='best')
 plt.savefig('ROC_curve.png', dpi=600)
-#plt.show()
+plt.close()
 
-plt.figure(4)
+plt.figure(figsize=(10, 6))
 precision, recall, _ = precision_recall_curve(y_test, y_prob)
 plt.plot(recall, precision)
 plt.xlabel('Recall')
 plt.ylabel('Precision')
 plt.title('Precision-Recall Curve')
 plt.savefig('Precision_Recall_curve.png', dpi=600)
-#plt.show()
+plt.close()
 
 ########################################################################################################################
 # Teste de previsão com 5 linhas aleatórias do dataset original
@@ -190,5 +186,3 @@ for passenger_id, name, true_value, prediction in zip(passenger_ids, names, true
     print(f"Valor verdadeiro: {'Sobreviveu' if true_value == 1 else 'Não sobreviveu'}")
     print(f"Predição: {'Sobreviveu' if prediction == 1 else 'Não sobreviveu'}")
     print()
-
-
