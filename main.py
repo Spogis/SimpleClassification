@@ -94,6 +94,7 @@ conf_matrix = confusion_matrix(y, predictions)
 conf_matrix_percentage_per_class = conf_matrix / np.sum(conf_matrix, axis=1, keepdims=True) * 100
 annot = np.array([["{:.1f}%".format(val) for val in row] for row in conf_matrix_percentage_per_class])
 
+plt.figure(1)
 plt.figure(figsize=(10, 8))
 sns.heatmap(conf_matrix_percentage_per_class, annot=annot, fmt="", cmap="Blues",
             xticklabels=['Not Survived', 'Survived'],
@@ -114,6 +115,7 @@ feature_importances = xgb.feature_importances_
 features = categorical_features + numerical_features
 importances_df = pd.DataFrame({'Features': features, 'Importance': feature_importances}).sort_values(by='Importance', ascending=False)
 
+plt.figure(2)
 plt.figure(figsize=(10, 6))
 sns.barplot(x='Importance', y='Features', data=importances_df)
 plt.title('Feature Importance')
@@ -130,6 +132,7 @@ y_prob = xgb.predict_proba(X_test)[:, 1]
 auc_score = roc_auc_score(y_test, y_prob)
 print(f"AUC: {auc_score:.2f}")
 
+plt.figure(3)
 # Plotando a curva ROC
 fpr, tpr, _ = roc_curve(y_test, y_prob)
 plt.plot(fpr, tpr, label=f'AUC = {auc_score:.2f}')
@@ -141,6 +144,7 @@ plt.legend(loc='best')
 plt.savefig('ROC_curve.png', dpi=600)
 #plt.show()
 
+plt.figure(4)
 precision, recall, _ = precision_recall_curve(y_test, y_prob)
 plt.plot(recall, precision)
 plt.xlabel('Recall')
