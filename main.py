@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Carregando os dados
-train_data_url = 'https://raw.githubusercontent.com/USERNAME/REPO/main/Datasets/train_data.csv'
-validation_data_url = 'https://raw.githubusercontent.com/USERNAME/REPO/main/Datasets/test_data.csv'
+train_data_url = 'https://raw.githubusercontent.com/Spogis/SimpleClassification/master/Datasets/train_data.csv'
+validation_data_url = 'https://raw.githubusercontent.com/Spogis/SimpleClassification/master/Datasets/test_data.csv'
 
 train_data = pd.read_csv(train_data_url)
 validation_data = pd.read_csv(validation_data_url)
