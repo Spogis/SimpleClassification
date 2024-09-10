@@ -74,7 +74,6 @@ xgb = XGBClassifier(
 xgb.fit(X_train, y_train)
 
 
-
 ########################################################################################################################
 # A partir daqui fazemos o pós processamento das análises
 ########################################################################################################################
@@ -187,3 +186,4 @@ for passenger_id, name, true_value, prediction in zip(passenger_ids, names, true
     print(f"Valor verdadeiro: {'Sobreviveu' if true_value == 1 else 'Não sobreviveu'}")
     print(f"Predição: {'Sobreviveu' if prediction == 1 else 'Não sobreviveu'}")
     print()
+
