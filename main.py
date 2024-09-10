@@ -1,16 +1,23 @@
+# Bibliotecas Gerais
 import pandas as pd
 import numpy as np
 
+# Bibliotecas para Plotar Gráficos
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Bibliotecas para Preparação dos Dados
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
+# Biblioteca para Classificação
+from xgboost import XGBClassifier
+
+# Bibliotecas para Pós Processamento das Classificações
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.metrics import f1_score, precision_recall_curve
 
-from xgboost import XGBClassifier
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 # Carregando os dados
 train_data_url = 'https://raw.githubusercontent.com/Spogis/SimpleClassification/master/Datasets/train_data.csv'
@@ -31,17 +38,24 @@ for feature in categorical_features:
     train_data[feature] = combined_data_encoded[:len(train_data)]
     validation_data[feature] = combined_data_encoded[len(train_data):]
 
+# Obter a ordem das colunas para entrada de dados (categóricas e numéricas)
+feature_order = categorical_features + numerical_features
+
+# Exibindo a ordem das features para a entrada de dados
+print("Ordem de entrada dos dados no modelo:")
+print(feature_order)
+
 # Padronização das variáveis numéricas
 scaler = StandardScaler()
 scaler.fit(train_data[numerical_features])
 train_data[numerical_features] = scaler.transform(train_data[numerical_features])
 validation_data[numerical_features] = scaler.transform(validation_data[numerical_features])
 
-# Separando as variáveis independentes da variável alvo
+# Separando as variáveis independentes da variável alvo (Classificação)
 y = train_data['Survived']
 X = train_data[categorical_features + numerical_features]
 
-# Dividindo os dados em conjuntos de treinamento e teste
+# Dividindo os dados em conjuntos de treinamento(80%) e teste(20%)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Definindo o modelo XGBClassifier com parâmetros fixos
@@ -58,6 +72,12 @@ xgb = XGBClassifier(
 
 # Treinando o modelo
 xgb.fit(X_train, y_train)
+
+
+
+########################################################################################################################
+# A partir daqui fazemos o pós processamento das análises
+########################################################################################################################
 
 # Avaliando o modelo no conjunto de teste
 test_accuracy = xgb.score(X_test, y_test)
@@ -88,7 +108,7 @@ plt.title('Confusion Matrix')
 plt.tight_layout()
 # Salvar a figura da matriz de confusão
 plt.savefig('confusion_matrix.png', dpi=600)
-plt.show()
+#plt.show()
 
 # Importância das características
 feature_importances = xgb.feature_importances_
@@ -102,7 +122,7 @@ plt.xlabel('Importance')
 plt.ylabel('Features')
 # Salvar a figura da importância das características
 plt.savefig('feature_importance.png', dpi=600)
-plt.show()
+#plt.show()
 
 # Calculando as probabilidades para a classe positiva
 y_prob = xgb.predict_proba(X_test)[:, 1]
@@ -120,7 +140,7 @@ plt.ylabel('True Positive Rate')
 plt.title('ROC Curve')
 plt.legend(loc='best')
 plt.savefig('ROC_curve.png', dpi=600)
-plt.show()
+#plt.show()
 
 precision, recall, _ = precision_recall_curve(y_test, y_prob)
 plt.plot(recall, precision)
@@ -128,11 +148,42 @@ plt.xlabel('Recall')
 plt.ylabel('Precision')
 plt.title('Precision-Recall Curve')
 plt.savefig('Precision_Recall_curve.png', dpi=600)
-plt.show()
+#plt.show()
 
-# Previsões no conjunto de validação
-X_Validation = validation_data[categorical_features + numerical_features]
-predictions = xgb.predict(X_Validation)
-output = pd.DataFrame({'PassengerId': validation_data.PassengerId, 'Survived': predictions})
-output.to_csv('submission_temp.csv', index=False)
-print("Your submission was successfully saved!")
+########################################################################################################################
+# Teste de previsão com 5 linhas aleatórias do dataset original
+########################################################################################################################
+
+# Selecionando 5 linhas aleatórias do conjunto de validação
+random_rows = validation_data.sample(n=5, random_state=42)
+
+# Obtendo os PassengerId e os nomes das linhas aleatórias
+passenger_ids = random_rows['PassengerId'].values
+names = random_rows['Name'].values
+
+# Obtendo os valores verdadeiros para comparação
+true_values = random_rows['Survived'].values
+
+# Aplicando as mesmas transformações de codificação (LabelEncoder) e padronização (StandardScaler)
+# Codificando variáveis categóricas
+for feature in categorical_features:
+    combined_data = pd.concat([train_data[feature], validation_data[feature]], axis=0)
+    combined_data_encoded = label_encoder.fit_transform(combined_data)
+    random_rows[feature] = label_encoder.transform(random_rows[feature])
+
+# Padronizando variáveis numéricas
+random_rows[numerical_features] = scaler.transform(random_rows[numerical_features])
+
+# Selecionando as colunas de interesse (categóricas e numéricas)
+random_rows_X = random_rows[categorical_features + numerical_features]
+
+# Fazendo as previsões com as linhas aleatórias
+random_predictions = xgb.predict(random_rows_X)
+
+print()
+# Exibindo os resultados
+for passenger_id, name, true_value, prediction in zip(passenger_ids, names, true_values, random_predictions):
+    print(f"Name: {name}")
+    print(f"Valor verdadeiro: {'Sobreviveu' if true_value == 1 else 'Não sobreviveu'}")
+    print(f"Predição: {'Sobreviveu' if prediction == 1 else 'Não sobreviveu'}")
+    print()
